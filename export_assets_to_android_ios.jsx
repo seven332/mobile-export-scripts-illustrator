@@ -3,30 +3,32 @@
 */
 var selectedExportOptions = {};
 
+var iconSize = 48;
+
 var androidExportOptions = [
     {
         name: "mdpi",
-        scaleFactor: 50,
+        scaleFactor: 1,
         type: "android"
     },
     {
         name: "hdpi",
-        scaleFactor: 75,
+        scaleFactor: 1.5,
         type: "android"
     },
     {
         name: "xhdpi",
-        scaleFactor: 100,
+        scaleFactor: 2,
         type: "android"
     },
     {
         name: "xxhdpi",
-        scaleFactor: 150,
+        scaleFactor: 3,
         type: "android"
     },
     {
         name: "xxxhdpi",
-        scaleFactor: 200,
+        scaleFactor: 4,
         type: "android"
     }
 ];
@@ -34,17 +36,17 @@ var androidExportOptions = [
 var iosExportOptions = [
     {
         name: "",
-        scaleFactor: 50,
+        scaleFactor: 1,
         type: "ios"
     },
     {
         name: "@2x",
-        scaleFactor: 100,
+        scaleFactor: 2,
         type: "ios"
     },
     {
         name: "@3x",
-        scaleFactor: 150,
+        scaleFactor: 3,
         type: "ios"
     }
 ];
@@ -104,8 +106,8 @@ function exportToFile(scaleFactor, resIdentifier, os) {
             options.transparency = true;
             options.artBoardClipping = true;
             options.antiAliasing = true;
-            options.verticalScale = scaleFactor;
-            options.horizontalScale = scaleFactor;
+            options.verticalScale = iconSize * scaleFactor * 100 / Math.abs(ab.artboardRect[1] - ab.artboardRect[3]);
+            options.horizontalScale = iconSize * scaleFactor * 100 / Math.abs(ab.artboardRect[0] - ab.artboardRect[2]);
 
             document.exportFile(file, ExportType.PNG24, options);
 	}
