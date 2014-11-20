@@ -3,8 +3,6 @@
 */
 var selectedExportOptions = {};
 
-var iconSize = 48;
-
 var androidExportOptions = [
     {
         name: "mdpi",
@@ -56,6 +54,13 @@ var document = app.activeDocument;
 
 if(document && folder) {
     var dialog = new Window("dialog","Select export sizes");
+    
+    var pdGroup = dialog.add("group");
+    pdGroup.add ("statictext", undefined, "size:");
+    var sizeText = pdGroup.add ("edittext", undefined, "48");
+    sizeText.characters = 5;
+    pdGroup.add ("statictext", undefined, "dp");
+
     var osGroup = dialog.add("group");
 
     var androidCheckboxes = createSelectionPanel("Android", androidExportOptions, osGroup);
@@ -66,10 +71,16 @@ if(document && folder) {
     var cancelButton = buttonGroup.add("button", undefined, "Cancel");
     
     okButton.onClick = function() {
+        var size = parseInt(sizeText.text);
+        if (isNaN(size) || size <= 0) {
+            alert(sizeText.text + " is not a valid size");
+            return;
+        }
+
         for (var key in selectedExportOptions) {
             if (selectedExportOptions.hasOwnProperty(key)) {
                 var item = selectedExportOptions[key];
-                exportToFile(item.scaleFactor, item.name, item.type);
+                exportToFile(size, item.scaleFactor, item.name, item.type);
             }
         }
         this.parent.parent.close();
@@ -82,7 +93,7 @@ if(document && folder) {
     dialog.show();
 }
 
-function exportToFile(scaleFactor, resIdentifier, os) {
+function exportToFile(size, scaleFactor, resIdentifier, os) {
     var i, ab, file, options, expFolder;
     if(os === "android")
         expFolder = new Folder(folder.fsName + "/drawable-" + resIdentifier);
@@ -106,8 +117,8 @@ function exportToFile(scaleFactor, resIdentifier, os) {
             options.transparency = true;
             options.artBoardClipping = true;
             options.antiAliasing = true;
-            options.verticalScale = iconSize * scaleFactor * 100 / Math.abs(ab.artboardRect[1] - ab.artboardRect[3]);
-            options.horizontalScale = iconSize * scaleFactor * 100 / Math.abs(ab.artboardRect[0] - ab.artboardRect[2]);
+            options.verticalScale = size * scaleFactor * 100 / Math.abs(ab.artboardRect[1] - ab.artboardRect[3]);
+            options.horizontalScale = size * scaleFactor * 100 / Math.abs(ab.artboardRect[0] - ab.artboardRect[2]);
 
             document.exportFile(file, ExportType.PNG24, options);
 	}
