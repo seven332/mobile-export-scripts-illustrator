@@ -129,4 +129,16 @@ function createSelectionPanel(name, array, parent) {
             }
         };
     }
+    var button = panel.add("button", undefined, "All");
+    button.onClick = function() {
+        var children = this.parent.children;
+        var child;
+        for (var i = 0; i < children.length; i++) {
+            child = children[i];
+            if (child instanceof Checkbox) {
+                child.value = true;
+                selectedExportOptions[child.item.name] = child.item;
+            }
+        }
+    }
 };
