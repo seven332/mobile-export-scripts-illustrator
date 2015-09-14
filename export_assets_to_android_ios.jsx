@@ -3,6 +3,8 @@
 */
 var selectedExportOptions = {};
 
+var mipmap;
+
 var androidExportOptions = [
     {
         name: "mdpi",
@@ -96,18 +98,18 @@ if(document && folder) {
 function exportToFile(size, scaleFactor, resIdentifier, os) {
     var i, ab, file, options, expFolder;
     if(os === "android")
-        expFolder = new Folder(folder.fsName + "/drawable-" + resIdentifier);
+        expFolder = new Folder(folder.fsName + (mipmap ? "/mipmap-" : "/drawable-") + resIdentifier);
     else if(os === "ios")
         expFolder = new Folder(folder.fsName + "/iOS");
 
-	if (!expFolder.exists) {
-		expFolder.create();
-	}
+    if (!expFolder.exists) {
+        expFolder.create();
+    }
 
-	for (i = document.artboards.length - 1; i >= 0; i--) {
-		document.artboards.setActiveArtboardIndex(i);
-		ab = document.artboards[i];
-        
+    for (i = document.artboards.length - 1; i >= 0; i--) {
+        document.artboards.setActiveArtboardIndex(i);
+        ab = document.artboards[i];
+
         if(os === "android")
             file = new File(expFolder.fsName + "/" + ab.name + ".png");
         else if(os === "ios")
@@ -121,8 +123,8 @@ function exportToFile(size, scaleFactor, resIdentifier, os) {
             options.horizontalScale = size * scaleFactor * 100 / Math.abs(ab.artboardRect[0] - ab.artboardRect[2]);
 
             document.exportFile(file, ExportType.PNG24, options);
-	}
-};
+    }
+}
 
 function createSelectionPanel(name, array, parent) {
     var panel = parent.add("panel", undefined, name);
@@ -140,6 +142,14 @@ function createSelectionPanel(name, array, parent) {
             }
         };
     }
+
+    if(name === "Android") {
+        var mmcb = panel.add("checkbox", undefined, "\u00A0mipmap");
+        mmcb.onClick = function() {
+            mipmap = this.value;
+        };
+    }
+
     var button = panel.add("button", undefined, "All");
     button.onClick = function() {
         var children = this.parent.children;
@@ -148,8 +158,9 @@ function createSelectionPanel(name, array, parent) {
             child = children[i];
             if (child instanceof Checkbox) {
                 child.value = true;
+                mipmap = true;
                 selectedExportOptions[child.item.name] = child.item;
             }
         }
     }
-};
+}
