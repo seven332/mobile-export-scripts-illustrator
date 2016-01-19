@@ -54,14 +54,21 @@ var iosExportOptions = [
 var folder = Folder.selectDialog("Select export directory");
 var document = app.activeDocument;
 
-if(document && folder) {
+if (document && folder) {
     var dialog = new Window("dialog","Select export sizes");
-    
-    var pdGroup = dialog.add("group");
-    pdGroup.add ("statictext", undefined, "size:");
-    var sizeText = pdGroup.add ("edittext", undefined, "48");
-    sizeText.characters = 5;
-    pdGroup.add ("statictext", undefined, "dp");
+
+    var widthGroup = dialog.add("group");
+    widthGroup.add("statictext", undefined, "width:");
+    var widthText = widthGroup.add ("edittext", undefined, "48");
+    widthText.characters = 5;
+    widthGroup.add("statictext", undefined, "dp");
+
+    var heightGroup = dialog.add("group");
+    heightGroup.add("statictext", undefined, "height:");
+    var heightText = heightGroup.add("edittext", undefined, "48");
+    heightText.characters = 5;
+    heightGroup.add("statictext", undefined, "dp");
+
 
     var osGroup = dialog.add("group");
 
@@ -73,16 +80,22 @@ if(document && folder) {
     var cancelButton = buttonGroup.add("button", undefined, "Cancel");
     
     okButton.onClick = function() {
-        var size = parseInt(sizeText.text);
-        if (isNaN(size) || size <= 0) {
-            alert(sizeText.text + " is not a valid size");
+        var width = parseInt(widthText.text);
+        if (isNaN(width) || width <= 0) {
+            alert(widthText.text + " is not a valid width");
+            return;
+        }
+
+        var height = parseInt(heightText.text);
+        if (isNaN(height) || height <= 0) {
+            alert(heightText.text + " is not a valid height");
             return;
         }
 
         for (var key in selectedExportOptions) {
             if (selectedExportOptions.hasOwnProperty(key)) {
                 var item = selectedExportOptions[key];
-                exportToFile(size, item.scaleFactor, item.name, item.type);
+                exportToFile(width, height, item.scaleFactor, item.name, item.type);
             }
         }
         this.parent.parent.close();
@@ -95,11 +108,11 @@ if(document && folder) {
     dialog.show();
 }
 
-function exportToFile(size, scaleFactor, resIdentifier, os) {
+function exportToFile(width, height, scaleFactor, resIdentifier, os) {
     var i, ab, file, options, expFolder;
-    if(os === "android")
+    if (os === "android")
         expFolder = new Folder(folder.fsName + (mipmap ? "/mipmap-" : "/drawable-") + resIdentifier);
-    else if(os === "ios")
+    else if (os === "ios")
         expFolder = new Folder(folder.fsName + "/iOS");
 
     if (!expFolder.exists) {
@@ -110,17 +123,17 @@ function exportToFile(size, scaleFactor, resIdentifier, os) {
         document.artboards.setActiveArtboardIndex(i);
         ab = document.artboards[i];
 
-        if(os === "android")
+        if (os === "android")
             file = new File(expFolder.fsName + "/" + ab.name + ".png");
-        else if(os === "ios")
+        else if (os === "ios")
             file = new File(expFolder.fsName + "/" + ab.name + resIdentifier + ".png");
             
             options = new ExportOptionsPNG24();
             options.transparency = true;
             options.artBoardClipping = true;
             options.antiAliasing = true;
-            options.verticalScale = size * scaleFactor * 100 / Math.abs(ab.artboardRect[1] - ab.artboardRect[3]);
-            options.horizontalScale = size * scaleFactor * 100 / Math.abs(ab.artboardRect[0] - ab.artboardRect[2]);
+            options.verticalScale = height * scaleFactor * 100 / Math.abs(ab.artboardRect[1] - ab.artboardRect[3]);
+            options.horizontalScale = width * scaleFactor * 100 / Math.abs(ab.artboardRect[0] - ab.artboardRect[2]);
 
             document.exportFile(file, ExportType.PNG24, options);
     }
@@ -129,11 +142,11 @@ function exportToFile(size, scaleFactor, resIdentifier, os) {
 function createSelectionPanel(name, array, parent) {
     var panel = parent.add("panel", undefined, name);
     panel.alignChildren = "left";
-    for(var i = 0; i < array.length;  i++) {
+    for (var i = 0; i < array.length;  i++) {
         var cb = panel.add("checkbox", undefined, "\u00A0" + array[i].name);
         cb.item = array[i];
         cb.onClick = function() {
-            if(this.value) {
+            if (this.value) {
                 selectedExportOptions[this.item.name] = this.item;
                 //alert("added " + this.item.name);
             } else {
@@ -143,7 +156,7 @@ function createSelectionPanel(name, array, parent) {
         };
     }
 
-    if(name === "Android") {
+    if (name === "Android") {
         var mmcb = panel.add("checkbox", undefined, "\u00A0mipmap");
         mmcb.onClick = function() {
             mipmap = this.value;
